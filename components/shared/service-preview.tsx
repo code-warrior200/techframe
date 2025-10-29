@@ -26,7 +26,7 @@ export default function ServicesPreview() {
           </Card>
         ))}
       </div>
-      <Link href="/services"><Button>View All Services</Button></Link>
+      <Link href="/services"><Button className="bg-gradient-to-r from-primary to-purple-500 text-white hover:opacity-90 hover:shadow-primary/30 transition-all">View All Services</Button></Link>
     </section>
   );
 }
