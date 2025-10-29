@@ -3,13 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  Menu,
-  X,
-  Linkedin,
-  Twitter,
-  Instagram,
-} from "lucide-react";
+import { Menu, X, Linkedin, Twitter, Instagram } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -21,21 +15,9 @@ const navLinks = [
 ];
 
 const socialLinks = [
-  {
-    href: "https://www.linkedin.com/",
-    icon: Linkedin,
-    label: "LinkedIn",
-  },
-  {
-    href: "https://x.com/",
-    icon: Twitter,
-    label: "Twitter",
-  },
-  {
-    href: "https://instagram.com/",
-    icon: Instagram,
-    label: "Instagram",
-  },
+  { href: "https://www.linkedin.com/", icon: Linkedin, label: "LinkedIn" },
+  { href: "https://x.com/", icon: Twitter, label: "Twitter" },
+  { href: "https://instagram.com/", icon: Instagram, label: "Instagram" },
 ];
 
 export default function Navbar() {
@@ -45,14 +27,12 @@ export default function Navbar() {
   return (
     <nav className="border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto flex justify-between items-center px-4 py-3">
-        {/* Logo */}
         <Link href="/" className="font-bold text-xl">
           TechFrame.io
         </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-6">
-          {/* Nav Links */}
           <div className="flex gap-4">
             {navLinks.map((link) => (
               <Link key={link.href} href={link.href}>
@@ -141,10 +121,8 @@ export default function Navbar() {
                 </Link>
               ))}
 
-              {/* Divider */}
-              <div className="w-3/4 h-px bg-border/50 my-2"></div>
+              <div className="w-3/4 h-px bg-border/50 my-2" />
 
-              {/* Mobile Social Links with Motion */}
               <motion.div
                 className="flex gap-5 mt-2"
                 initial="hidden"

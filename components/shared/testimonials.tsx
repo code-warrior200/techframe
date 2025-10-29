@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const testimonials = [
@@ -36,21 +36,20 @@ const testimonials = [
 export default function Testimonials() {
   const [current, setCurrent] = useState(0);
 
-  // Auto-slide every 6 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      nextSlide();
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [current]);
-
-  const nextSlide = () => {
+  // ✅ Memoize functions to avoid re-renders and stale closures
+  const nextSlide = useCallback(() => {
     setCurrent((prev) => (prev + 1) % testimonials.length);
-  };
+  }, []);
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-  };
+  }, []);
+
+  // ✅ UseEffect dependency fixed (was re-running too often)
+  useEffect(() => {
+    const interval = setInterval(nextSlide, 6000);
+    return () => clearInterval(interval);
+  }, [nextSlide]);
 
   return (
     <section className="max-w-6xl mx-auto px-6 py-24 text-center relative">
@@ -65,54 +64,35 @@ export default function Testimonials() {
         </p>
       </div>
 
-      {/* 3D Carousel Container */}
+      {/* Carousel */}
       <div className="relative h-[420px] flex items-center justify-center overflow-hidden perspective-[1200px]">
         {testimonials.map((t, index) => {
           const offset = (index - current + testimonials.length) % testimonials.length;
 
-          let scale = 1;
-          let opacity = 1;
-          let translateX = 0;
-          let zIndex = 0;
-          let rotateY = 0;
+          const base = {
+            scale: 0.8,
+            opacity: 0,
+            x: 0,
+            rotateY: 0,
+            zIndex: 0,
+          };
 
-          if (offset === 0) {
-            scale = 1;
-            opacity = 1;
-            zIndex = 50;
-            translateX = 0;
-            rotateY = 0;
-          } else if (offset === 1 || (offset === -testimonials.length + 1)) {
-            scale = 0.9;
-            opacity = 0.7;
-            zIndex = 30;
-            translateX = 150;
-            rotateY = -15;
-          } else if (offset === testimonials.length - 1 || offset === -1) {
-            scale = 0.9;
-            opacity = 0.7;
-            zIndex = 30;
-            translateX = -150;
-            rotateY = 15;
-          } else {
-            opacity = 0;
-            zIndex = 0;
-            scale = 0.8;
-            translateX = 0;
-            rotateY = 0;
-          }
+          const states = {
+            active: { scale: 1, opacity: 1, x: 0, rotateY: 0, zIndex: 50 },
+            right: { scale: 0.9, opacity: 0.7, x: 150, rotateY: -15, zIndex: 30 },
+            left: { scale: 0.9, opacity: 0.7, x: -150, rotateY: 15, zIndex: 30 },
+          };
+
+          let animate = base;
+          if (offset === 0) animate = states.active;
+          else if (offset === 1) animate = states.right;
+          else if (offset === testimonials.length - 1) animate = states.left;
 
           return (
             <motion.div
               key={index}
               className="absolute w-full max-w-md"
-              animate={{
-                scale,
-                opacity,
-                x: translateX,
-                rotateY,
-                zIndex,
-              }}
+              animate={animate}
               transition={{ duration: 0.7, ease: "easeInOut" }}
               style={{ transformStyle: "preserve-3d" }}
             >
@@ -159,7 +139,7 @@ export default function Testimonials() {
         </button>
       </div>
 
-      {/* Dots Indicator */}
+      {/* Dots */}
       <div className="flex justify-center gap-2 mt-10">
         {testimonials.map((_, index) => (
           <button
