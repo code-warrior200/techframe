@@ -6,7 +6,7 @@ import Footer from "@/components/shared/footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Modern Business",
+  title: "Business website - Modern Solutions for Your Growth",
   description: "Professional business website built with Next.js and shadcn/ui",
 };
 

@@ -1,32 +1,162 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { ChevronDown } from "lucide-react";
+import { useRef, useEffect, useState } from "react";
 
-export default function Hero() {
+interface HeroProps {
+  typingSpeed?: number;     // speed of typing (ms per letter)
+  deletingSpeed?: number;   // speed of deleting (ms per letter)
+  pauseDuration?: number;   // pause time before deleting (ms)
+}
+
+export default function Hero({
+  typingSpeed = 80,
+  deletingSpeed = 40,
+  pauseDuration = 20000,
+}: HeroProps) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Parallax scroll effect
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
+
+  // Smooth scroll to next section
+  const scrollToNextSection = () => {
+    const nextSection = document.querySelector("#next-section");
+    if (nextSection) nextSection.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Typewriter effect (looping)
+  const texts = [
+    "Empower Your Business with Modern Solutions",
+    "Grow Through Design and Strategy",
+    "Innovate with Cutting-Edge Technology",
+  ];
+
+  const [displayedText, setDisplayedText] = useState("");
+  const [textIndex, setTextIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isTyping, setIsTyping] = useState(true);
+
+  useEffect(() => {
+    const currentText = texts[textIndex];
+    const speed = isDeleting ? deletingSpeed : typingSpeed;
+
+    const timeout = setTimeout(() => {
+      setDisplayedText((prev) =>
+        isDeleting
+          ? currentText.slice(0, prev.length - 1)
+          : currentText.slice(0, prev.length + 1)
+      );
+
+      // Finished typing
+      if (!isDeleting && displayedText === currentText) {
+        setIsTyping(false);
+        setTimeout(() => {
+          setIsDeleting(true);
+          setIsTyping(true);
+        }, pauseDuration);
+      }
+
+      // Finished deleting
+      else if (isDeleting && displayedText === "") {
+        setIsDeleting(false);
+        setTextIndex((prev) => (prev + 1) % texts.length);
+      }
+    }, speed);
+
+    return () => clearTimeout(timeout);
+  }, [displayedText, isDeleting, textIndex, typingSpeed, deletingSpeed, pauseDuration]);
+
   return (
-    <section className="text-center py-24 bg-gradient-to-b from-background to-muted">
-      <motion.h1
-        initial={{ opacity: 0, y: 20 }}
+    <section
+      ref={ref}
+      className="relative min-h-[90vh] flex flex-col items-center justify-center text-center overflow-hidden"
+    >
+      {/* Parallax Background */}
+      <motion.div
+        style={{
+          y,
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1920&q=80')",
+        }}
+        className="absolute inset-0 bg-cover bg-center will-change-transform"
+      />
+
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+
+      {/* Hero Content */}
+      <motion.div
+        initial={{ opacity: 0, y: 25 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="text-5xl font-bold mb-4"
+        transition={{ duration: 0.8 }}
+        className="relative z-10 px-6 max-w-3xl"
       >
-        Empower Your Business with Modern Solutions
-      </motion.h1>
-      <motion.p
+        <h1 className="text-4xl sm:text-6xl font-extrabold text-white mb-6 leading-tight">
+          {displayedText}
+          <span
+            className={`border-r-4 pr-1 ml-1 ${
+              isTyping ? "border-white animate-pulse" : "border-transparent"
+            }`}
+          />
+        </h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1 }}
+          className="text-lg sm:text-xl text-gray-200 mb-10 max-w-2xl mx-auto"
+        >
+          We help brands grow through strategy, design, and cutting-edge
+          technology.
+        </motion.p>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link href="/services">
+            <Button
+              size="lg"
+              className="px-8 py-6 text-lg font-semibold shadow-md hover:shadow-lg transition"
+            >
+              Explore Services
+            </Button>
+          </Link>
+          <Link href="/contact">
+            <Button
+              size="lg"
+              variant="outline"
+              className="px-8 py-6 text-lg font-semibold border-black text-black hover:bg-white hover:text-black transition"
+            >
+              Contact Us
+            </Button>
+          </Link>
+        </div>
+      </motion.div>
+
+      {/* Scroll Indicator */}
+      <motion.div
+        onClick={scrollToNextSection}
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-        className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto"
+        animate={{ opacity: 1, y: [0, 10, 0] }}
+        transition={{
+          delay: 1.2,
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="absolute bottom-10 flex flex-col items-center text-gray-300 z-10 cursor-pointer group"
       >
-        We help businesses grow with strategy, design, and technology.
-      </motion.p>
-      <div className="flex justify-center gap-4">
-        <Link href="/services"><Button>Explore Services</Button></Link>
-        <Link href="/contact"><Button variant="outline">Contact Us</Button></Link>
-      </div>
+        <span className="text-sm mb-2 group-hover:text-white transition">
+          Scroll Down
+        </span>
+        <ChevronDown className="w-6 h-6 group-hover:text-white transition" />
+      </motion.div>
     </section>
   );
 }
