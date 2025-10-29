@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import {
   Menu,
   X,
-  Github,
   Linkedin,
   Twitter,
   Instagram,
