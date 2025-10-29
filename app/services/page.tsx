@@ -55,7 +55,7 @@ export default function ServicesPage() {
     offset: ["start start", "end end"],
   });
 
-  const [isMobile, setIsMobile] = useState(false);
+  const [ ,setIsMobile] = useState(false);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
@@ -65,18 +65,6 @@ export default function ServicesPage() {
 
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: isMobile ? 20 : 40 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: isMobile ? i * 0.05 : i * 0.1,
-        duration: 0.6,
-        ease: [0.42, 0, 0.58, 1], // use a cubic bezier easing array
-      },
-    }),
-  };
 
   return (
     <div ref={ref} className="relative overflow-hidden flex flex-col">
@@ -167,7 +155,6 @@ export default function ServicesPage() {
               <motion.div
                 key={service.title}
                 custom={i}
-                variants={cardVariants}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.3 }}
